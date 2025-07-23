@@ -13,9 +13,9 @@ const Topbar: React.FC = () => {
   };
 
   const navItems = [
-    { to: '/', label: 'C-band  (MEASAT-3d)' },
-    { to: '/ka', label: 'Ka-band (MEASAT-3d)' },
-    { to: '/ku', label: 'Ku-band (MEASAT-3d)' },
+    { to: '/', label: 'C-band' },
+    { to: '/ka', label: 'Ka-band' },
+    { to: '/ku', label: 'Ku-band ' },
     { to: '/download', label: 'Export Data' },
   ];
 
