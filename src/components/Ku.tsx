@@ -112,7 +112,7 @@ const Ku: React.FC = () => {
   if (marker1.length && marker2.length) {
     // Plot marker1 line (upper)
     combinedData.datasets.push({
-      label: 'MARKER 1 (Upper)',
+      label: 'MARKER 1',
       data: marker1.map((e) => ({ x: new Date(e.timestamp), y: e.value })),
       borderColor: 'rgba(0, 102, 204, 1)',
       backgroundColor: 'rgba(0, 102, 204, 0.1)',
@@ -122,7 +122,7 @@ const Ku: React.FC = () => {
 
     // Plot marker2 line (lower)
     combinedData.datasets.push({
-      label: 'MARKER 2 (Lower)',
+      label: 'MARKER 2',
       data: marker2.map((e) => ({ x: new Date(e.timestamp), y: e.value })),
       borderColor: 'rgba(204, 0, 0, 1)',
       backgroundColor: 'rgba(204, 0, 0, 0.1)',
