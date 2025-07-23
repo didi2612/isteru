@@ -55,7 +55,7 @@ const parseNMEASentence = (sentence: string) => {
   };
 };
 
-const WeatherStation = () => {
+const Cband = () => {
   const [rawData, setRawData] = useState<WeatherData[]>([]);
 
   const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVzY2p3Y2N4YmJkYWNncXlrcnF3Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0NjE5NjIyMiwiZXhwIjoyMDYxNzcyMjIyfQ.azC7n_nGBFdaT98XBEUiJrsbdMyQTW9ynIKmB9dg_kk"; // Replace with your actual key
@@ -192,7 +192,7 @@ const WeatherStation = () => {
 
   return (
     <div className="p-4  mx-5 bg-gray-50 ">
-      <h1 className="mt-7 text-2xl uppercase font-bold text-black text-center mb-2">Weather Station</h1>
+      <h1 className="mt-7 text-2xl  font-bold text-black text-center mb-2"> C-band  (MEASAT-3d)</h1>
       <p className="text-gray-600 text-md text-center mb-3">
         IIUM Strategic Technologies and Engineering Research Unit (ISTERU) Data Monitoring System
       </p>
@@ -201,4 +201,4 @@ const WeatherStation = () => {
   );
 };
 
-export default WeatherStation;
+export default Cband;

@@ -109,8 +109,8 @@ const Ka: React.FC = () => {
   return (
     <div className="p-4 md:p-10 bg-white min-h-screen text-black">
       <div className="mb-8">
-        <h1 className="text-2xl md:text-3xl font-bold text-center uppercase tracking-wide">
-          K-Above Readings
+        <h1 className="text-2xl md:text-3xl font-bold text-center  tracking-wide">
+          Ka-band (MEASAT-3d)
         </h1>
         <p className="text-gray-600  text-center mt-2">
           IIUM Strategic Technologies and Engineering Research Unit (ISTERU) Data Monitoring System

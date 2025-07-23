@@ -9,7 +9,7 @@ import {
 
 import Topbar from "./components/Navbar.tsx";
 import Ku from "./components/Ku.tsx";
-import WeatherStation from "./components/WeatherStation.tsx";
+import Cband from "./components/C-band.tsx";
 import Ka from "./components/Ka.tsx";
 import Download from "./components/Download.tsx";
 import Login from "./components/Login.tsx";
@@ -33,7 +33,7 @@ const AppRoutes: React.FC = () => {
             path="/"
             element={
               <ProtectedRoute>
-                <WeatherStation />
+                <Cband />
               </ProtectedRoute>
             }
           />

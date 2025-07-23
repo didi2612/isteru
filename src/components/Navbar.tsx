@@ -13,9 +13,9 @@ const Topbar: React.FC = () => {
   };
 
   const navItems = [
-    { to: '/', label: 'Weather Station' },
-    { to: '/ka', label: 'KA' },
-    { to: '/ku', label: 'KU' },
+    { to: '/', label: 'C-band  (MEASAT-3d)' },
+    { to: '/ka', label: 'Ka-band (MEASAT-3d)' },
+    { to: '/ku', label: 'Ku-band (MEASAT-3d)' },
     { to: '/download', label: 'Export Data' },
   ];
 
@@ -30,6 +30,7 @@ const Topbar: React.FC = () => {
             alt="LOURA Logo"
           />
         </div>
+        
 
         {/* Desktop Menu */}
         <div className="hidden md:flex items-center space-x-6">
