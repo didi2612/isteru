@@ -132,7 +132,7 @@ const Ka: React.FC = () => {
   }
 
   return (
-    <div className="p-4 md:p-10 bg-white min-h-screen text-black">
+   <div className="p-4  mx-5 bg-gray-50 ">
       <div className="mb-8 text-center">
         <h1 className="text-2xl md:text-3xl font-bold tracking-wide">
           Ka-band (MEASAT-3d)
