@@ -16,6 +16,8 @@ const Topbar: React.FC = () => {
     { to: '/', label: 'C-band' },
     { to: '/ka', label: 'Ka-band' },
     { to: '/ku', label: 'Ku-band ' },
+    { to: '/ses', label: 'Ku-band (SES) ' },
+    { to: '/starlink', label: 'Starlink ' },
     { to: '/download', label: 'Export Data' },
   ];
 

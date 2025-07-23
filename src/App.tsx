@@ -14,6 +14,8 @@ import Ka from "./components/Ka.tsx";
 import Download from "./components/Download.tsx";
 import Login from "./components/Login.tsx";
 import ProtectedRoute from "./components/ProtectedRoute.tsx";
+import Ses from "./components/Ses.tsx";
+import Starlink from "./components/Starlink.tsx";
 
 // Routes layout
 const AppRoutes: React.FC = () => {
@@ -42,6 +44,22 @@ const AppRoutes: React.FC = () => {
             element={
               <ProtectedRoute>
                 <Ku />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/ses"
+            element={
+              <ProtectedRoute>
+                <Ses />
+              </ProtectedRoute>
+            }
+          />
+             <Route
+            path="/starlink"
+            element={
+              <ProtectedRoute>
+                <Starlink />
               </ProtectedRoute>
             }
           />
