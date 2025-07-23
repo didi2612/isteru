@@ -1,0 +1,168 @@
+import React, { useEffect, useState } from "react";
+import { Line } from "react-chartjs-2";
+import "chart.js";
+
+interface WeatherData {
+  timestamp: string;
+  id: string;
+  temp: number | null;
+  pressure: number | null;
+  humidity: number | null;
+  windSpeed: number | null;
+  windDirection: number | null;
+  value1: number | null;
+  value2: number | null;
+}
+
+const parseNMEASentence = (sentence: string) => {
+  return {
+    temp: null,
+    pressure: null,
+    humidity: null,
+    windSpeed: null,
+    windDirection: null,
+    value1: null,
+    value2: null,
+    ...(() => {
+      if (sentence.startsWith("$WIXDR")) {
+        const parts = sentence.split(",");
+        const tempIndex = parts.indexOf("TEMP");
+        const pressIndex = parts.indexOf("PRESS");
+        const rhIndex = parts.indexOf("RH");
+
+        return {
+          temp: tempIndex !== -1 ? parseFloat(parts[tempIndex - 2]) : null,
+          pressure: pressIndex !== -1 ? parseFloat(parts[pressIndex - 2]) : null,
+          humidity: rhIndex !== -1 ? parseFloat(parts[rhIndex - 2]) : null,
+        };
+      }
+
+      if (sentence.startsWith("$WIMWV")) {
+        const parts = sentence.split(",");
+        const windSpeed = parseFloat(parts[3]);
+        let windDirection = parts[1];
+
+        windDirection = !isNaN(parseFloat(windDirection)) ? parseFloat(windDirection) : windDirection;
+
+        return {
+          windSpeed: !isNaN(windSpeed) ? windSpeed : null,
+          windDirection: windDirection,
+        };
+      }
+
+      if (sentence.startsWith("$HYUDF")) {
+        const parts = sentence.split(",");
+        const value1 = parseFloat(parts[7]);
+        const value2 = parseFloat(parts[8]);
+
+        return {
+          value1: !isNaN(value1) ? value1 : NaN,
+          value2: !isNaN(value2) ? value2 : NaN,
+        };
+      }
+
+      return {};
+    })(),
+  };
+};
+
+const WeatherStation = () => {
+  const [rawData, setRawData] = useState<WeatherData[]>([]);
+
+  const SUPABASE_URL = "https://escjwccxbbdacgqykrqw.supabase.co/rest/v1/loura";
+  const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVzY2p3Y2N4YmJkYWNncXlrcnF3Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0NjE5NjIyMiwiZXhwIjoyMDYxNzcyMjIyfQ.azC7n_nGBFdaT98XBEUiJrsbdMyQTW9ynIKmB9dg_kk";
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const res = await fetch(`${SUPABASE_URL}?order=timestamp.asc&limit=1000`, {
+        headers: {
+          apikey: SUPABASE_KEY,
+          Authorization: `Bearer ${SUPABASE_KEY}`,
+        },
+      });
+      const json = await res.json();
+
+      const parsed = json.map((entry: any) => {
+        const raw = entry.data;
+        const parsedData = parseNMEASentence(raw);
+        return {
+          timestamp: entry.timestamp,
+          id: entry.id,
+          ...parsedData,
+        };
+      });
+
+      setRawData(parsed);
+    };
+
+    fetchData();
+    const intervalId = setInterval(fetchData, 10000);
+    return () => clearInterval(intervalId);
+  }, []);
+
+  const formatTimestamp = (timestamp: string) => {
+    const parsedTimestamp = new Date(timestamp);
+    const formattedTime = parsedTimestamp.toLocaleString('en-US', {
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: false,
+      timeZone: 'Asia/Kuala_Lumpur',
+    });
+    return formattedTime;
+  };
+
+  const filterLatest20 = (data: WeatherData[]) => {
+    return [...data]
+      .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime())
+      .slice(-21);
+  };
+
+  const getLatestValidData = (field: keyof WeatherData) => {
+    const latestSorted = filterLatest20(rawData);
+    for (let i = latestSorted.length - 1; i >= 0; i--) {
+      const entry = latestSorted[i];
+      if (entry[field] !== null && entry[field] !== undefined) {
+        return entry[field];
+      }
+    }
+    return "N/A";
+  };
+
+  const renderChart = (title: string, field: keyof WeatherData, unit: string, color: string) => (
+    <div className="bg-white rounded-2xl shadow hover:shadow-lg transition-shadow duration-300 border border-gray-200 p-4">
+      <h3 className="text-lg font-semibold text-center">{title}</h3>
+      <div className="text-center text-xl font-bold mb-2">
+        {getLatestValidData(field)} {unit}
+      </div>
+      <Line data={{
+        labels: filterLatest20(rawData).map((d) => formatTimestamp(d.timestamp)),
+        datasets: [{
+          label: `${title}`,
+          data: filterLatest20(rawData).map((d) => d[field] ?? NaN),
+          borderColor: color,
+          fill: false,
+        }]
+      }} options={{ responsive: true, spanGaps: true }} />
+    </div>
+  );
+
+  return (
+    <div className="min-h-screen bg-gray-50 p-1">
+      <h1 className="mt-7 text-2xl uppercase font-bold text-black mb-2">Weather Station</h1>
+      <p className="text-gray-600 text-md mb-3">Logging, Ocean-Based Utilities For Renewable Analytics</p>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 p-5">
+        {renderChart("Temperature (°C)", "temp", "°C", "rgba(255,99,132,1)")}
+        {renderChart("Pressure (atm)", "pressure", "atm", "rgba(54, 162, 235, 1)")}
+        {renderChart("Humidity (%RH)", "humidity", "%RH", "rgba(75, 192, 192, 1)")}
+        {renderChart("Wind Speed (m/s)", "windSpeed", "m/s", "rgba(255, 159, 64, 1)")}
+        {renderChart("Wind Direction ", "windDirection", "", "rgba(255, 159, 64, 1)")}
+        {renderChart("Solar Radiation", "value1", "W/m²", "rgba(153, 102, 255, 1)")}
+        {renderChart("Daily Solar Radiation", "value2", "kWh/m²", "rgba(255, 206, 86, 1)")}
+      </div>
+    </div>
+  );
+};
+
+export default WeatherStation;
