@@ -192,12 +192,15 @@ const Cband = () => {
 
   return (
     <div className="p-4  mx-5 bg-gray-50 ">
-      <h1 className="mt-7 text-2xl  font-bold text-black text-center mb-2"> C-band  (MEASAT-3d)</h1>
-      <p className="text-gray-600 text-md text-center mb-3">
-        IIUM Strategic Technologies and Engineering Research Unit (ISTERU) Data Monitoring System
-      </p>
-      
-    </div>
+      <div className="mb-8 text-center">
+        <h1 className="text-2xl md:text-3xl font-bold tracking-wide">
+          C-band (MEASAT-3d)
+        </h1>
+        <p className="text-gray-600 mt-2">
+          IIUM Strategic Technologies and Engineering Research Unit (ISTERU) Data Monitoring System
+        </p>
+      </div>
+      </div>
   );
 };
 
