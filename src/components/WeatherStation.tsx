@@ -192,8 +192,8 @@ const WeatherStation = () => {
 
   return (
     <div className="p-4  mx-5 bg-gray-50 ">
-      <h1 className="mt-7 text-2xl uppercase font-bold text-black mb-2">Weather Station</h1>
-      <p className="text-gray-600 text-md mb-3">
+      <h1 className="mt-7 text-2xl uppercase font-bold text-black text-center mb-2">Weather Station</h1>
+      <p className="text-gray-600 text-md text-center mb-3">
         IIUM Strategic Technologies and Engineering Research Unit (ISTERU) Data Monitoring System
       </p>
       

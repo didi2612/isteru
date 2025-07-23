@@ -2,87 +2,104 @@ import React, { useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
 
-const Sidebar: React.FC = () => {
-  const [isOpen, setIsOpen] = useState(false);
+const Topbar: React.FC = () => {
+  const [menuOpen, setMenuOpen] = useState(false);
 
-  const toggleSidebar = () => {
-    setIsOpen(!isOpen);
+  const toggleMenu = () => setMenuOpen(!menuOpen);
+
+  const handleLogout = () => {
+    document.cookie = "username=; path=/; max-age=0";
+    window.location.href = "/login";
   };
 
- const handlelogout = () => {
-  document.cookie = "username=; path=/; max-age=0";
-  window.location.href = "/login";
-};
-
+  const navItems = [
+    { to: '/', label: 'Weather Station' },
+    { to: '/ka', label: 'KA' },
+    { to: '/ku', label: 'KU' },
+    { to: '/download', label: 'Export Data' },
+  ];
 
   return (
-    <div className="relative min-h-screen bg-gray-50 flex">
-      {/* Mobile Toggle Button */}
-      <button
-        className="lg:hidden fixed top-4 left-4 bg-gray-100 text-white p-2 rounded-full shadow-lg focus:outline-none z-50 hover:bg-white transition duration-300"
-        onClick={toggleSidebar}
-      >
-        {isOpen ? <XMarkIcon className="h-6 w-6" /> : <Bars3Icon className="h-6 w-6" />}
-      </button>
-
-      {/* Sidebar */}
-      <div
-        className={`${
-          isOpen ? 'translate-x-0' : '-translate-x-full'
-        } lg:translate-x-0 lg:static fixed top-0 left-0 min-h-screen w-72 bg-gray-900 text-white border-r border-gray-800 shadow-xl z-40 transition-transform duration-300`}
-      >
-        {/* Top Logo */}
-        <div className="flex bg-white justify-center items-center border-b border-gray-900 py-5">
+    <nav className="w-full bg-gray-650 text-white shadow-md sticky top-0 z-50">
+      <div className="flex items-center justify-between h-16 px-4 sm:px-6 lg:px-8">
+        {/* Logo */}
+        <div className="flex-shrink-0 flex items-center gap-3">
           <img
+            className="h-14 w-auto"
             src="https://tronova.azmiproductions.com/img/isteru.png"
             alt="LOURA Logo"
-            className="w-32 h-auto"
           />
         </div>
 
-        {/* Navigation Items */}
-        <ul className="mt-8 space-y-4  px-6">
-          {[{ to: '/', label: 'Weather Station' }, { to: '/ka', label: 'KA' }, { to: '/ku', label: 'Ku' },  { to: '/download', label: 'Export Data' }].map(
-            ({ to, label }) => (
-              <li key={to}>
-                <NavLink
-                  to={to}
-                  className={({ isActive }) =>
-                    `flex items-center gap-3 py-3 px-4 rounded-lg text-sm font-semibold transition-all duration-300 ${
-                      isActive
-                        ? 'bg-white text-black shadow-lg'
-                        : 'text-gray-400 hover:bg-gray-700 hover:text-white'
-                    }`
-                  }
-                >
-                  <span className="material-icons">{label}</span>
-                </NavLink>
-              </li>
-            )
-          )}
-        </ul>
+        {/* Desktop Menu */}
+        <div className="hidden md:flex items-center space-x-6">
+          {navItems.map(({ to, label }) => (
+            <NavLink
+              key={to}
+              to={to}
+              className={({ isActive }) =>
+                `text-sm font-medium px-3 py-2 rounded-md transition ${
+                  isActive
+                    ? 'bg-white text-gray-900 shadow'
+                    : 'text-black hover:text-white hover:bg-gray-700'
+                }`
+              }
+            >
+              {label}
+            </NavLink>
+          ))}
+        </div>
 
         {/* Logout Button */}
-        <div className="absolute bottom-10 w-full px-6">
+        <div className="hidden md:flex">
           <button
-            onClick={handlelogout}
-            className="w-full py-3 rounded-lg bg-red-500 hover:bg-red-600 text-white text-sm font-semibold shadow-lg transition-all duration-300"
+            onClick={handleLogout}
+            className="ml-4 px-4 py-2 bg-red-600 hover:bg-red-700 rounded-md text-sm font-medium shadow transition"
           >
             Logout
           </button>
         </div>
 
-        {/* Footer */}
-        <div className="absolute bottom-4 w-full px-6 text-center text-gray-500 text-xs">
-          <span>
-            Powered by <span className="text-cyan-500 font-semibold">Azmi Productions</span>
-          </span>
+        {/* Mobile Toggle */}
+        <div className="md:hidden">
+          <button
+            onClick={toggleMenu}
+            className="p-2 rounded-md text-gray-300 hover:text-white hover:bg-gray-700 transition"
+          >
+            {menuOpen ? <XMarkIcon className="h-6 w-6" /> : <Bars3Icon className="h-6 w-6" />}
+          </button>
         </div>
       </div>
 
-      
-    </div>
+      {/* Mobile Menu */}
+      {menuOpen && (
+        <div className="md:hidden px-4 pt-2 pb-4 bg-gray-800 space-y-1">
+          {navItems.map(({ to, label }) => (
+            <NavLink
+              key={to}
+              to={to}
+              onClick={() => setMenuOpen(false)}
+              className={({ isActive }) =>
+                `block px-4 py-2 rounded-md text-sm font-medium ${
+                  isActive
+                    ? 'bg-white text-gray-900'
+                    : 'text-gray-300 hover:bg-gray-700 hover:text-white'
+                }`
+              }
+            >
+              {label}
+            </NavLink>
+          ))}
+          <button
+            onClick={handleLogout}
+            className="mt-2 w-full text-left px-4 py-2 rounded-md text-sm font-medium bg-red-600 hover:bg-red-700 text-white"
+          >
+            Logout
+          </button>
+        </div>
+      )}
+    </nav>
   );
 };
 
-export default Sidebar;
+export default Topbar;

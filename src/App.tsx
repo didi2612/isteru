@@ -7,7 +7,7 @@ import {
   useLocation,
 } from "react-router-dom";
 
-import Sidebar from "./components/Navbar.tsx";
+import Topbar from "./components/Navbar.tsx";
 import Ku from "./components/Ku.tsx";
 import WeatherStation from "./components/WeatherStation.tsx";
 import Ka from "./components/Ka.tsx";
@@ -18,12 +18,12 @@ import ProtectedRoute from "./components/ProtectedRoute.tsx";
 // Routes layout
 const AppRoutes: React.FC = () => {
   const location = useLocation();
-  const hideSidebar = ["/login", "/register"].includes(location.pathname);
+  const hideTopbar = ["/login", "/register"].includes(location.pathname);
 
   return (
-    <div className="flex min-h-screen bg-white">
-      {!hideSidebar && <Sidebar />}
-      <div className="flex-1 overflow-y-auto">
+    <div className="flex flex-col min-h-screen bg-white">
+      {!hideTopbar && <Topbar />}
+      <main className="flex-1 overflow-y-auto p-4 bg-gray-50">
         <Routes>
           {/* Public route */}
           <Route path="/login" element={<Login />} />
@@ -53,7 +53,6 @@ const AppRoutes: React.FC = () => {
               </ProtectedRoute>
             }
           />
-         
           <Route
             path="/download"
             element={
@@ -63,7 +62,7 @@ const AppRoutes: React.FC = () => {
             }
           />
         </Routes>
-      </div>
+      </main>
     </div>
   );
 };
