@@ -1,206 +1,140 @@
 import React, { useEffect, useState } from "react";
 import { Line } from "react-chartjs-2";
-import "chart.js";
+import {
+  Chart as ChartJS,
+  LineElement,
+  PointElement,
+  LinearScale,
+  CategoryScale,
+  Tooltip,
+  Legend,
+} from "chart.js";
 
-interface WeatherData {
-  timestamp: string;
-  id: string;
-  temp: number | null;
-  pressure: number | null;
-  humidity: number | null;
-  windSpeed: number | null;
-  windDirection: number | null;
-  value1: number | null;
-  value2: number | null;
+ChartJS.register(LineElement, PointElement, LinearScale, CategoryScale, Tooltip, Legend);
+
+interface DistroData {
+  id: number;
+  local: string;
+  rain_intensity: number | null;
+  rain_amt_acc: number | null;
+  radar_reflect: number | null;
+  num_of_particles: number | null;
+  rain_amt: number | null;
+  kinetic_energy: number | null;
+  batt: number | null;
+  inserted_at: string;
 }
 
-const parseNMEASentence = (sentence: string) => {
-  return {
-    temp: null,
-    pressure: null,
-    humidity: null,
-    windSpeed: null,
-    windDirection: null,
-    value1: null,
-    value2: null,
-    ...(() => {
-      if (sentence.startsWith("$WIXDR")) {
-        const parts = sentence.split(",");
-        return {
-          temp: parts.includes("TEMP") ? parseFloat(parts[parts.indexOf("TEMP") - 2]) : null,
-          pressure: parts.includes("PRESS") ? parseFloat(parts[parts.indexOf("PRESS") - 2]) : null,
-          humidity: parts.includes("RH") ? parseFloat(parts[parts.indexOf("RH") - 2]) : null,
-        };
-      }
-      if (sentence.startsWith("$WIMWV")) {
-        const parts = sentence.split(",");
-        const windSpeed = parseFloat(parts[3]);
-        const windDirection = parseFloat(parts[1]);
-        return {
-          windSpeed: isNaN(windSpeed) ? null : windSpeed,
-          windDirection: isNaN(windDirection) ? null : windDirection,
-        };
-      }
-      if (sentence.startsWith("$HYUDF")) {
-        const parts = sentence.split(",");
-        const value1 = parseFloat(parts[7]);
-        const value2 = parseFloat(parts[8]);
-        return {
-          value1: isNaN(value1) ? null : value1,
-          value2: isNaN(value2) ? null : value2,
-        };
-      }
-      return {};
-    })(),
-  };
-};
-
 const Starlink = () => {
-  const [rawData, setRawData] = useState<WeatherData[]>([]);
+  const [distroData, setDistroData] = useState<DistroData[]>([]);
 
-  const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVzY2p3Y2N4YmJkYWNncXlrcnF3Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0NjE5NjIyMiwiZXhwIjoyMDYxNzcyMjIyfQ.azC7n_nGBFdaT98XBEUiJrsbdMyQTW9ynIKmB9dg_kk"; // Replace with your actual key
-  const BASE_URL = "https://escjwccxbbdacgqykrqw.supabase.co/rest/v1";
+  const SUPABASE_KEY =
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpiamFpemdka25ia3V1YXRmZGpwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTMyNDI2NDQsImV4cCI6MjA2ODgxODY0NH0.bvncA5QvD0aTVPRMhEIBT9kZHT7vP9CR7zzQzNQ03CI";
+  const BASE_URL = "https://zbjaizgdknbkuuatfdjp.supabase.co/rest/v1";
 
   const headers = {
     apikey: SUPABASE_KEY,
     Authorization: `Bearer ${SUPABASE_KEY}`,
   };
 
-  // Fetch all data with pagination (limit 1000)
-  const fetchAllData = async (table: string): Promise<any[]> => {
-    let allData: any[] = [];
-    let from = 0;
-    const limit = 1000;
-
-    while (true) {
-      const res = await fetch(
-        `${BASE_URL}/${table}?order=timestamp.asc&limit=${limit}&offset=${from}`,
-        { headers }
-      );
-      const batch = await res.json();
-      allData = [...allData, ...batch];
-      if (batch.length < limit) break;
-      from += limit;
-    }
-
-    return allData;
-  };
-
   useEffect(() => {
-    const fetchData = async () => {
-      const [tempHumid, wind, solar] = await Promise.all([
-        fetchAllData("temp_humid"),
-        fetchAllData("wind"),
-        fetchAllData("solar"),
-      ]);
+    const fetchDistro = async () => {
+      try {
+        const res = await fetch(`${BASE_URL}/distro?order=inserted_at.asc`, { headers });
+        const data = await res.json();
 
-      const formatData = (entry: any, type: string): WeatherData => {
-        const parsed = parseNMEASentence(entry.data);
-        return {
-          timestamp: entry.timestamp,
-          id: entry.id,
-          temp: type === "temp_humid" ? parsed.temp : null,
-          pressure: type === "temp_humid" ? parsed.pressure : null,
-          humidity: type === "temp_humid" ? parsed.humidity : null,
-          windSpeed: type === "wind" ? parsed.windSpeed : null,
-          windDirection: type === "wind" ? parsed.windDirection : null,
-          value1: type === "solar" ? parsed.value1 : null,
-          value2: type === "solar" ? parsed.value2 : null,
-        };
-      };
-
-      const combined: WeatherData[] = [
-        ...tempHumid.map((e) => formatData(e, "temp_humid")),
-        ...wind.map((e) => formatData(e, "wind")),
-        ...solar.map((e) => formatData(e, "solar")),
-      ];
-
-      combined.sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
-
-      setRawData(combined);
+        if (Array.isArray(data)) {
+          setDistroData(data);
+        } else {
+          console.error("Unexpected response:", data);
+          setDistroData([]);
+        }
+      } catch (error) {
+        console.error("Failed to fetch distro data:", error);
+        setDistroData([]);
+      }
     };
 
-    fetchData();
-    const intervalId = setInterval(fetchData, 10000);
-    return () => clearInterval(intervalId);
+    fetchDistro();
+    const interval = setInterval(fetchDistro, 10000);
+    return () => clearInterval(interval);
   }, []);
 
-  const formatTimestamp = (timestamp: string) => {
-    const parsed = new Date(timestamp);
-    return parsed.toLocaleTimeString("en-US", {
+  const formatTime = (timestamp: string) => {
+    return new Date(timestamp).toLocaleTimeString("en-MY", {
       hour: "2-digit",
       minute: "2-digit",
-      hour12: false,
+      second: "2-digit",
       timeZone: "Asia/Kuala_Lumpur",
-    });
-  };
-
-  const getCommonTimestamps = () => {
-    const timestamps = Array.from(new Set(rawData.map((d) => d.timestamp)));
-    return timestamps
-      .sort((a, b) => new Date(a).getTime() - new Date(b).getTime())
-      .slice(-10);
-  };
-
-  const getAlignedData = (field: keyof WeatherData) => {
-    const commonTimestamps = getCommonTimestamps();
-    return commonTimestamps.map((ts) => {
-      const entries = rawData.filter((d) => d.timestamp === ts);
-      for (const entry of entries) {
-        if (entry[field] !== null && entry[field] !== undefined) {
-          return entry[field];
-        }
-      }
-      return null;
     });
   };
 
   const renderChart = (
     title: string,
-    field: keyof WeatherData,
-    unit: string,
-    color: string
+    field: keyof DistroData,
+    color: string,
+    unit: string
   ) => {
-    const commonTimestamps = getCommonTimestamps();
-    const alignedData = getAlignedData(field);
-    const latestValid =
-      [...alignedData].reverse().find((v) => v !== null && v !== undefined) ?? "N/A";
+    const labels = distroData.map((d) => formatTime(d.inserted_at));
+    const dataValues = distroData.map((d) => d[field] ?? NaN);
 
     return (
-      <div className="bg-white rounded-2xl shadow hover:shadow-lg transition-shadow duration-300 border border-gray-200 p-4">
+      <div className="bg-white rounded-2xl shadow p-4 border border-gray-200">
         <h3 className="text-lg font-semibold text-center">{title}</h3>
         <div className="text-center text-xl font-bold mb-2">
-          {latestValid} {unit}
+          {dataValues.at(-1) ?? "N/A"} {unit}
         </div>
         <Line
           data={{
-            labels: commonTimestamps.map(formatTimestamp),
+            labels,
             datasets: [
               {
                 label: title,
-                data: alignedData.map((v) => v ?? NaN),
+                data: dataValues,
                 borderColor: color,
+                backgroundColor: color,
                 fill: false,
               },
             ],
           }}
-          options={{ responsive: true, spanGaps: true }}
+          options={{
+            responsive: true,
+            spanGaps: true,
+            plugins: {
+              legend: { display: false },
+            },
+            scales: {
+              x: {
+                ticks: {
+                  maxTicksLimit: 6,
+                },
+              },
+            },
+          }}
         />
       </div>
     );
   };
 
   return (
-    <div className="p-4  mx-5 bg-gray-50 ">
+    <div className="p-4 mx-5 bg-gray-50">
       <div className="mb-8 text-center">
-        <h1 className="text-2xl md:text-3xl font-bold tracking-wide">
-         Starlink
-        </h1>
+        <h1 className="text-2xl md:text-3xl font-bold tracking-wide">Disdrometer</h1>
         <p className="text-gray-600 mt-2">
-          IIUM Strategic Technologies and Engineering Research Unit (ISTERU) Data Monitoring System
+          IIUM Strategic Technologies and Engineering Research Unit (ISTERU) Data Monitoring
+          System
         </p>
       </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+        {renderChart("Rain Intensity", "rain_intensity", "#1f77b4", "mm/hr")}
+        {renderChart("Rain Amount", "rain_amt", "#ff7f0e", "mm")}
+        {renderChart("Radar Reflectivity", "radar_reflect", "#2ca02c", "dBZ")}
+        {renderChart("Particles", "num_of_particles", "#d62728", "count")}
+        {renderChart("Kinetic Energy", "kinetic_energy", "#9467bd", "J/m²")}
+        {renderChart("Battery Voltage", "batt", "#8c564b", "V")}
       </div>
+    </div>
   );
 };
 

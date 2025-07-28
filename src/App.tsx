@@ -32,7 +32,7 @@ const AppRoutes: React.FC = () => {
 
           {/* Protected routes */}
           <Route
-            path="/"
+            path="/cband"
             element={
               <ProtectedRoute>
                 <Cband />
@@ -56,7 +56,7 @@ const AppRoutes: React.FC = () => {
             }
           />
              <Route
-            path="/starlink"
+            path="/"
             element={
               <ProtectedRoute>
                 <Starlink />

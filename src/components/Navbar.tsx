@@ -13,11 +13,10 @@ const Topbar: React.FC = () => {
   };
 
   const navItems = [
-    { to: '/', label: 'C-band' },
+    { to: '/', label: 'Disdrometer' },
     { to: '/ka', label: 'Ka-band' },
     { to: '/ku', label: 'Ku-band ' },
-    { to: '/ses', label: 'Ku-band (SES) ' },
-    { to: '/starlink', label: 'Starlink ' },
+    { to: '/cband', label: 'C-band ' },
     { to: '/download', label: 'Export Data' },
   ];
 
