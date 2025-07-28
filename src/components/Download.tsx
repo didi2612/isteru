@@ -5,6 +5,7 @@ const BASE_URL = "https://zbjaizgdknbkuuatfdjp.supabase.co/rest/v1/";
 const ENDPOINTS = {
   ku: "Ku",
   ka: "Ka",
+  distro: "distro",
 };
 
 const exportToCsv = (filename: string, rows: any[]) => {
@@ -48,57 +49,67 @@ const Download: React.FC = () => {
   const [loading, setLoading] = useState(false);
 
   const fetchDataByDate = async () => {
-    if (!startDateTime || !endDateTime) {
-      alert("Please select both start and end datetime.");
-      return;
+  if (!startDateTime || !endDateTime) {
+    alert("Please select both start and end datetime.");
+    return;
+  }
+
+  if (new Date(startDateTime) > new Date(endDateTime)) {
+    alert("Start must be before end.");
+    return;
+  }
+
+  const startUTC = new Date(startDateTime).toISOString();
+  const endUTC = new Date(endDateTime).toISOString();
+
+  console.log(`[Manual Filter] UTC Range: ${startUTC} → ${endUTC}`);
+
+  setLoading(true);
+  let allData: any[] = [];
+  let page = 0;
+  const pageSize = 1000;
+
+  try {
+    while (true) {
+      const from = page * pageSize;
+      const to = from + pageSize - 1;
+
+      const url = `${BASE_URL}${selectedEndpoint}?select=*&order=id.desc`;
+      console.log(`[Page ${page + 1}] Fetching: ${url} | Range: ${from}-${to}`);
+
+      const response = await fetch(url, {
+        headers: {
+          apikey: SUPABASE_KEY,
+          Authorization: `Bearer ${SUPABASE_KEY}`,
+          Range: `${from}-${to}`,
+        },
+      });
+
+      if (!response.ok) throw new Error("Failed to fetch data");
+
+      const chunk = await response.json();
+      allData = allData.concat(chunk);
+      console.log(`[Page ${page + 1}] Received: ${chunk.length} records`);
+
+      if (chunk.length < pageSize) break;
+
+      page++;
     }
 
-    if (new Date(startDateTime) > new Date(endDateTime)) {
-      alert("Start must be before end.");
-      return;
-    }
+    console.log(`[Total] Fetched: ${allData.length} records`);
 
-    const startUTC = new Date(startDateTime).toISOString();
-    const endUTC = new Date(endDateTime).toISOString();
+    let filtered: any[] = [];
 
-    console.log(`[Manual Filter] Input Range: ${startDateTime} to ${endDateTime}`);
-    console.log(`[Manual Filter] UTC Range: ${startUTC} → ${endUTC}`);
-
-    setLoading(true);
-    let allData: any[] = [];
-    let page = 0;
-    const pageSize = 1000;
-
-    try {
-      while (true) {
-        const from = page * pageSize;
-        const to = from + pageSize - 1;
-
-        const url = `${BASE_URL}${selectedEndpoint}?select=*&order=id.desc`;
-        console.log(`[Page ${page + 1}] Fetching: ${url} | Range: ${from}-${to}`);
-
-        const response = await fetch(url, {
-          headers: {
-            apikey: SUPABASE_KEY,
-            Authorization: `Bearer ${SUPABASE_KEY}`,
-            Range: `${from}-${to}`,
-          },
-        });
-
-        if (!response.ok) throw new Error("Failed to fetch data");
-
-        const chunk = await response.json();
-        allData = allData.concat(chunk);
-        console.log(`[Page ${page + 1}] Received: ${chunk.length} records`);
-
-        if (chunk.length < pageSize) break;
-
-        page++;
-      }
-
-      console.log(`[Total] Fetched: ${allData.length} records`);
-
-      const filtered = allData.filter((row: any) => {
+    if (selectedEndpoint === "distro") {
+      // Filter using 'inserted_at' field
+      filtered = allData.filter((row: any) => {
+        if (!row.inserted_at) return false;
+        const timeValue = new Date(row.inserted_at).getTime();
+        return timeValue >= new Date(startUTC).getTime() && timeValue <= new Date(endUTC).getTime();
+      });
+    } else {
+      // Default behavior for Ku and Ka
+      filtered = allData.filter((row: any) => {
         const { year, month, day, time } = row;
         if (!year || !month || !day || !time) return false;
 
@@ -107,28 +118,27 @@ const Download: React.FC = () => {
         ).toISOString();
 
         const timeValue = new Date(constructedISO).getTime();
-        const start = new Date(startUTC).getTime();
-        const end = new Date(endUTC).getTime();
-
-        const inRange = timeValue >= start && timeValue <= end;
+        const inRange = timeValue >= new Date(startUTC).getTime() && timeValue <= new Date(endUTC).getTime();
 
         if (inRange) {
-          row.timestamp = constructedISO; // Add timestamp for export
+          row.timestamp = constructedISO;
         }
 
         return inRange;
       });
-
-      console.log(`[Filtered] Matched records: ${filtered.length}`);
-      setData(filtered);
-    } catch (err) {
-      console.error("[Manual Filter] Error:", err);
-      alert("Error fetching data. Please try again.");
-      setData([]);
-    } finally {
-      setLoading(false);
     }
-  };
+
+    console.log(`[Filtered] Matched records: ${filtered.length}`);
+    setData(filtered);
+  } catch (err) {
+    console.error("[Manual Filter] Error:", err);
+    alert("Error fetching data. Please try again.");
+    setData([]);
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   return (
     <div className="p-6 mx-5 mt-4 bg-white shadow-md rounded-lg">
