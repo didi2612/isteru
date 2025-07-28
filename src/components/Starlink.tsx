@@ -75,8 +75,9 @@ const Starlink = () => {
     color: string,
     unit: string
   ) => {
-    const labels = distroData.map((d) => formatTime(d.inserted_at));
-    const dataValues = distroData.map((d) => d[field] ?? NaN);
+    const latest20 = distroData.slice(-15);
+    const labels = latest20.map((d) => formatTime(d.inserted_at));
+    const dataValues = latest20.map((d) => d[field] ?? NaN);
 
     return (
       <div className="bg-white rounded-2xl shadow p-4 border border-gray-200">
@@ -129,6 +130,7 @@ const Starlink = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
         {renderChart("Rain Intensity", "rain_intensity", "#1f77b4", "mm/hr")}
         {renderChart("Rain Amount", "rain_amt", "#ff7f0e", "mm")}
+        {renderChart("Rain Amount Accumulated", "rain_amt_acc", "#ffbb78", "mm")}
         {renderChart("Radar Reflectivity", "radar_reflect", "#2ca02c", "dBZ")}
         {renderChart("Particles", "num_of_particles", "#d62728", "count")}
         {renderChart("Kinetic Energy", "kinetic_energy", "#9467bd", "J/m²")}
