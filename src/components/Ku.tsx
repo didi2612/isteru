@@ -156,21 +156,23 @@ const Ku: React.FC = () => {
                 responsive: true,
                 maintainAspectRatio: false,
                 scales: {
-                  x: {
-                    type: 'time',
-                    time: {
-                      unit: 'minute',
-                      displayFormats: {
-                        minute: 'HH:mm',
-                      },
-                    },
-                    ticks: {
-                      color: '#6b7280',
-                    },
-                    grid: {
-                      display: false,
-                    },
-                  },
+                 x: {
+  type: 'time',
+  time: {
+    unit: 'minute',
+    displayFormats: {
+      minute: 'HH:mm',
+    },
+    tooltipFormat: 'yyyy-MM-dd HH:mm:ss', // this makes tooltip use 24-hour
+  },
+  ticks: {
+    color: '#6b7280',
+  },
+  grid: {
+    display: false,
+  },
+},
+
                   y: {
                     beginAtZero: false,
                     ticks: {

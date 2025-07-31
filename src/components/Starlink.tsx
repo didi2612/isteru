@@ -66,6 +66,7 @@ const Starlink = () => {
       hour: "2-digit",
       minute: "2-digit",
       second: "2-digit",
+      hour12: false,
       timeZone: "Asia/Kuala_Lumpur",
     });
   };
@@ -117,6 +118,7 @@ const Starlink = () => {
           hour: "2-digit",
           minute: "2-digit",
           second: "2-digit",
+          hour12: false,
           timeZone: "Asia/Kuala_Lumpur",
         });
       },
