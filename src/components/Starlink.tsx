@@ -40,7 +40,8 @@ const Starlink = () => {
   useEffect(() => {
     const fetchDistro = async () => {
       try {
-        const res = await fetch(`${BASE_URL}/distro?order=inserted_at.asc`, { headers });
+        const res = await fetch(`${BASE_URL}/distro?order=inserted_at.desc&limit=15`, { headers });
+
         const data = await res.json();
 
         if (Array.isArray(data)) {
@@ -75,7 +76,8 @@ const Starlink = () => {
     color: string,
     unit: string
   ) => {
-    const latest20 = distroData.slice(-15);
+    const latest20 = [...distroData].reverse();
+
     const labels = latest20.map((d) => formatTime(d.inserted_at));
     const dataValues = latest20.map((d) => d[field] ?? NaN);
 
