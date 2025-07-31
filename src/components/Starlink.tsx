@@ -40,7 +40,7 @@ const Starlink = () => {
   useEffect(() => {
     const fetchDistro = async () => {
       try {
-        const res = await fetch(`${BASE_URL}/distro?order=inserted_at.desc&limit=15`, { headers });
+        const res = await fetch(`${BASE_URL}/distro?order=inserted_at.desc&limit=10`, { headers });
 
         const data = await res.json();
 
@@ -65,7 +65,7 @@ const Starlink = () => {
     return new Date(timestamp).toLocaleTimeString("en-MY", {
       hour: "2-digit",
       minute: "2-digit",
-      second: "2-digit",
+      
       timeZone: "Asia/Kuala_Lumpur",
     });
   };
@@ -103,15 +103,37 @@ const Starlink = () => {
           options={{
             responsive: true,
             spanGaps: true,
-            plugins: {
-              legend: { display: false },
-            },
+           plugins: {
+  legend: { display: false },
+  tooltip: {
+    callbacks: {
+      title: (tooltipItems) => {
+        const dateStr = tooltipItems[0].label; // Already formatted as time
+        const fullDate = latest20[tooltipItems[0].dataIndex].inserted_at;
+        return new Date(fullDate).toLocaleString("en-MY", {
+          year: "numeric",
+          month: "short",
+          day: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit",
+          timeZone: "Asia/Kuala_Lumpur",
+        });
+      },
+    },
+  },
+}
+,
             scales: {
-              x: {
-                ticks: {
-                  maxTicksLimit: 6,
-                },
-              },
+             x: {
+  type: "category",
+  ticks: {
+    autoSkip: false,
+    maxRotation: 45,
+    minRotation: 45,
+  },
+},
+
             },
           }}
         />
